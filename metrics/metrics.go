@@ -1,6 +1,8 @@
 package metrics
 
 import (
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -65,6 +67,6 @@ func PrometheusMiddleware() gin.HandlerFunc {
 		timer.ObserveDuration()
 
 		status := c.Writer.Status()
-		HttpRequestsTotal.WithLabelValues(c.Request.Method, path, string(status)).Inc()
+		HttpRequestsTotal.WithLabelValues(c.Request.Method, path, strconv.Itoa(status)).Inc()
 	}
 }
