@@ -15,7 +15,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-var ticketService *service.TicketService
+var ticketService service.TicketServiceInterface
 
 func main() {
 	// Load environment variables
@@ -36,7 +36,7 @@ func main() {
 	router.Use(metrics.PrometheusMiddleware())
 
 	// Initialize routes
-	initializeRoutes(router)
+	InitializeRoutes(router)
 
 	// Start server
 	log.Println("Server starting on :8080")
@@ -45,7 +45,8 @@ func main() {
 	}
 }
 
-func initializeRoutes(router *gin.Engine) {
+// InitializeRoutes initializes the application's routes
+func InitializeRoutes(router *gin.Engine) {
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
