@@ -19,6 +19,16 @@ func NewTicketService() *TicketService {
 	}
 }
 
+type TicketServiceInterface interface {
+	CreateTicket(title, description, createdBy string) (*models.Ticket, error)
+	GetTicket(id uuid.UUID) (*models.Ticket, error)
+	GetAllTickets() ([]models.Ticket, error)
+	UpdateTicket(id uuid.UUID, title, description string, status models.Status, priority models.Priority, assignedTo string) (*models.Ticket, error)
+	DeleteTicket(id uuid.UUID) error
+}
+
+var _ TicketServiceInterface = (*TicketService)(nil)
+
 func (s *TicketService) CreateTicket(title, description, createdBy string) (*models.Ticket, error) {
 	ticket := models.NewTicket(title, description, createdBy)
 	if err := s.repo.Create(ticket); err != nil {

@@ -97,4 +97,35 @@ curl -X POST http://localhost:8080/api/v1/tickets \
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Unit Tests and Code Coverage
+
+The project now includes comprehensive unit tests for all ticket endpoints, including both success and error cases. The tests use the `testify` package for mocking and assertions.
+
+### Running Tests
+
+To run the tests, execute the following command from the project root:
+
+```bash
+go test ./...
+```
+
+To generate a coverage report, run:
+
+```bash
+go test ./... -coverprofile=coverage.out && go tool cover -func=coverage.out
+```
+
+The current code coverage is approximately 77.5%, with detailed coverage for models, repository, service, and HTTP handlers.
+
+### Test Structure
+
+- **Models**: Tests for the `NewTicket` function.
+- **Repository**: Tests for CRUD operations using an in-memory SQLite database.
+- **Service**: Tests for business logic, including error handling.
+- **HTTP Handlers**: Tests for all ticket endpoints, including error cases.
+
+### Mocking
+
+The tests use `testify/mock` to mock the `TicketService` interface, allowing for isolated testing of HTTP handlers without a real database connection. 
