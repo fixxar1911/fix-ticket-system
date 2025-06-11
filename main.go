@@ -3,10 +3,13 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"fix-ticket-system/config"
 	"fix-ticket-system/metrics"
+	"fix-ticket-system/middleware"
 	"fix-ticket-system/models"
+	"fix-ticket-system/routes"
 	"fix-ticket-system/service"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +20,14 @@ import (
 
 var ticketService service.TicketServiceInterface
 
+func getEnv(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
+}
+
 func main() {
 	// Load environment variables
 	if err := godotenv.Load(); err != nil {
@@ -26,21 +37,28 @@ func main() {
 	// Initialize database
 	config.InitDB()
 
-	// Initialize service
+	// Initialize services
 	ticketService = service.NewTicketService()
+	userService := service.NewUserService(config.DB)
+
+	// Initialize auth middleware
+	authMiddleware := middleware.NewAuthMiddleware(userService, getEnv("JWT_SECRET", "your-secret-key"))
 
 	// Initialize router
-	router := gin.Default()
+	r := gin.Default()
 
 	// Add Prometheus middleware
-	router.Use(metrics.PrometheusMiddleware())
+	r.Use(metrics.PrometheusMiddleware())
 
-	// Initialize routes
-	InitializeRoutes(router)
+	// Register routes
+	InitializeRoutes(r)
+	adminRoutes := routes.NewAdminRoutes(userService, authMiddleware)
+	adminRoutes.Register(r)
 
 	// Start server
-	log.Println("Server starting on :8080")
-	if err := router.Run(":8080"); err != nil {
+	port := getEnv("PORT", "8080")
+	log.Println("Server starting on :" + port)
+	if err := r.Run(":" + port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }
